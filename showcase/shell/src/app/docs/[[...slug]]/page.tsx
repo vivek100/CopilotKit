@@ -7,7 +7,8 @@ import { Callout, Cards, Card, Accordions, Accordion } from "@/components/mdx-co
 import { PropertyReference } from "@/components/property-reference";
 
 const CONTENT_DIR = path.join(process.cwd(), "src/content/docs");
-const SNIPPETS_DIR = path.join(process.cwd(), "src/content/snippets");
+// Resolve snippets relative to CONTENT_DIR (which is known to work for filesystem reads)
+const SNIPPETS_DIR = path.join(CONTENT_DIR, "..", "snippets");
 
 // Map component tags to snippet file paths (relative to SNIPPETS_DIR).
 // When an MDX page contains only a single component tag like <CopilotRuntime />,
@@ -51,9 +52,15 @@ function inlineSnippets(content: string): string {
     if (!match) return content;
     const componentName = match[1];
     const snippetRel = SNIPPET_MAP[componentName];
-    if (!snippetRel) return content;
+    if (!snippetRel) {
+        console.warn(`[docs] No snippet mapping for component: ${componentName}`);
+        return content;
+    }
     const snippetPath = path.join(SNIPPETS_DIR, snippetRel);
-    if (!fs.existsSync(snippetPath)) return content;
+    if (!fs.existsSync(snippetPath)) {
+        console.warn(`[docs] Snippet file not found: ${snippetPath}`);
+        return content;
+    }
     let snippetContent = fs.readFileSync(snippetPath, "utf-8");
     // Strip frontmatter from snippet
     snippetContent = snippetContent.replace(/^---[\s\S]*?---\n?/, "");
