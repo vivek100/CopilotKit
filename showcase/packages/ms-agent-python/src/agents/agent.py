@@ -9,7 +9,7 @@ from __future__ import annotations
 from textwrap import dedent
 from typing import Annotated
 
-from agent_framework import ChatAgent, ChatClientProtocol, ai_function
+from agent_framework import Agent, BaseChatClient, tool
 from agent_framework_ag_ui import AgentFrameworkAgent
 from pydantic import Field
 
@@ -29,7 +29,7 @@ PREDICT_STATE_CONFIG: dict[str, dict[str, str]] = {
 }
 
 
-@ai_function(
+@tool(
     name="update_proverbs",
     description=(
         "Replace the entire list of proverbs with the provided values. "
@@ -51,7 +51,7 @@ def update_proverbs(
     return f"Proverbs updated. Tracking {len(proverbs)} item(s)."
 
 
-@ai_function(
+@tool(
     name="get_weather",
     description="Share a quick weather update for a location. Use this to render the frontend weather card.",
 )
@@ -66,7 +66,7 @@ def get_weather(
     )
 
 
-@ai_function(
+@tool(
     name="go_to_moon",
     description="Request a playful human-in-the-loop confirmation before launching a mission to the moon.",
     approval_mode="always_require",
@@ -76,9 +76,10 @@ def go_to_moon() -> str:
     return "Mission control requested. Awaiting human approval for the lunar launch."
 
 
-def create_agent(chat_client: ChatClientProtocol) -> AgentFrameworkAgent:
+def create_agent(chat_client: BaseChatClient) -> AgentFrameworkAgent:
     """Instantiate the CopilotKit demo agent backed by Microsoft Agent Framework."""
-    base_agent = ChatAgent(
+    base_agent = Agent(
+        client=chat_client,
         name="proverbs_agent",
         instructions=dedent(
             """
@@ -113,7 +114,6 @@ def create_agent(chat_client: ChatClientProtocol) -> AgentFrameworkAgent:
               after that summary unless the user asks. ALWAYS send this conversational summary so the message persists.
             """.strip()
         ),
-        chat_client=chat_client,
         tools=[update_proverbs, get_weather, go_to_moon],
     )
 
