@@ -57,7 +57,7 @@ function buildAnthropicMessages(
 
                 const textContent = (msg as any).content;
                 if (textContent) {
-                    content.push({ type: "text", text: textContent });
+                    content.push({ type: "text", text: textContent, citations: null });
                 }
 
                 for (const tc of toolCalls) {
