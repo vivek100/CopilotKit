@@ -41,3 +41,4 @@ COPY --from=builder /app/shell/src/content ./src/content
 
 EXPOSE 10000
 CMD ["npx", "next", "start", "-p", "10000"]
+# Cache bust: 1775013460
