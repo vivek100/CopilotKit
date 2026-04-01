@@ -36,4 +36,5 @@ RUN chmod +x entrypoint.sh
 
 EXPOSE 10000
 ENV NODE_ENV=production
+ENV PYTHONPATH="/app/agents:${PYTHONPATH}"
 CMD ["./entrypoint.sh"]
