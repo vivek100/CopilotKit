@@ -22,7 +22,42 @@ interface SearchEntry {
     type: "page" | "reference" | "ag-ui";
     title: string;
     subtitle: string;
+    section: string;
     href: string;
+}
+
+// Derive a human-readable section breadcrumb from a relative path.
+// e.g. "concepts/middleware" → "Concepts"
+//      "sdk/js/client/middleware" → "JS SDK › @ag-ui/client"
+//      "backend/copilot-runtime" → "Backend"
+const SECTION_LABELS: Record<string, string> = {
+    concepts: "Concepts",
+    quickstart: "Quickstart",
+    drafts: "Draft Proposals",
+    tutorials: "Tutorials",
+    development: "Development",
+    "sdk/js": "JS SDK",
+    "sdk/js/core": "JS SDK › @ag-ui/core",
+    "sdk/js/client": "JS SDK › @ag-ui/client",
+    "sdk/python": "Python SDK",
+    "sdk/python/core": "Python SDK › ag_ui.core",
+    "sdk/python/encoder": "Python SDK › ag_ui.encoder",
+};
+
+function deriveSectionLabel(hrefPrefix: string, href: string): string {
+    // Strip prefix to get relative path, then drop the filename
+    const rel = href.slice(hrefPrefix.length + 1); // e.g. "concepts/middleware"
+    const parts = rel.split("/");
+    if (parts.length <= 1) return ""; // top-level page, no section
+
+    // Try longest prefix match first
+    for (let len = parts.length - 1; len >= 1; len--) {
+        const candidate = parts.slice(0, len).join("/");
+        if (SECTION_LABELS[candidate]) return SECTION_LABELS[candidate];
+    }
+
+    // Fallback: capitalize first directory
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1).replace(/-/g, " ");
 }
 
 function extractTitle(content: string, filename: string): string {
@@ -85,7 +120,8 @@ function scanMdxDir(
                 const title = extractTitle(content, item.name);
                 const subtitle = extractDescription(content);
 
-                entries.push({ type, title, subtitle, href });
+                const section = deriveSectionLabel(hrefPrefix, href);
+                entries.push({ type, title, subtitle, section, href });
             }
         }
     }
@@ -99,11 +135,11 @@ function main() {
 
     // Static pages
     entries.push(
-        { type: "page", title: "Home", subtitle: "Front door", href: "/" },
-        { type: "page", title: "Integrations", subtitle: "All integrations", href: "/integrations" },
-        { type: "page", title: "Feature Matrix", subtitle: "Compare features across integrations", href: "/matrix" },
-        { type: "page", title: "API Reference", subtitle: "CopilotKit components and hooks", href: "/reference" },
-        { type: "page", title: "AG-UI Overview", subtitle: "The Agent-User Interaction Protocol", href: "/ag-ui" }
+        { type: "page", title: "Home", subtitle: "Front door", section: "", href: "/" },
+        { type: "page", title: "Integrations", subtitle: "All integrations", section: "", href: "/integrations" },
+        { type: "page", title: "Feature Matrix", subtitle: "Compare features across integrations", section: "", href: "/matrix" },
+        { type: "page", title: "API Reference", subtitle: "CopilotKit components and hooks", section: "", href: "/reference" },
+        { type: "page", title: "AG-UI Overview", subtitle: "The Agent-User Interaction Protocol", section: "", href: "/ag-ui" }
     );
 
     // CopilotKit Reference

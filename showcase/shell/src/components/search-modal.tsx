@@ -8,6 +8,7 @@ interface SearchResult {
     type: "integration" | "feature" | "demo" | "page" | "reference" | "ag-ui";
     title: string;
     subtitle: string;
+    section?: string;
     href: string;
 }
 
@@ -41,7 +42,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         const pages = searchIndex as SearchResult[];
 
         for (const p of pages) {
-            if (p.title.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q)) {
+            if (p.title.toLowerCase().includes(q) || p.subtitle.toLowerCase().includes(q) || (p.section && p.section.toLowerCase().includes(q))) {
                 items.push(p);
             }
         }
@@ -139,7 +140,14 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
                                         {r.type}
                                     </span>
                                     <div className="min-w-0">
-                                        <div className="text-[13px] font-medium text-[var(--text)] truncate">{r.title}</div>
+                                        <div className="text-[13px] font-medium text-[var(--text)] truncate">
+                                            {r.title}
+                                            {r.section && (
+                                                <span className="ml-2 text-[11px] font-normal text-[var(--text-faint)]">
+                                                    {r.section}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="text-[11px] text-[var(--text-muted)] truncate">{r.subtitle}</div>
                                     </div>
                                 </button>
