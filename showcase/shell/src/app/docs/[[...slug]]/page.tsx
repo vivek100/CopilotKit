@@ -7,6 +7,61 @@ import { Callout, Cards, Card, Accordions, Accordion } from "@/components/mdx-co
 import { PropertyReference } from "@/components/property-reference";
 
 const CONTENT_DIR = path.join(process.cwd(), "src/content/docs");
+const SNIPPETS_DIR = path.join(process.cwd(), "src/content/snippets");
+
+// Map component tags to snippet file paths (relative to SNIPPETS_DIR).
+// When an MDX page contains only a single component tag like <CopilotRuntime />,
+// we replace it with the snippet's actual content so the page renders properly.
+const SNIPPET_MAP: Record<string, string> = {
+    "A2UI": "shared/generative-ui/a2ui.mdx",
+    "AgUI": "shared/backend/ag-ui.mdx",
+    "AGUI": "shared/backend/ag-ui.mdx",
+    "CodingAgents": "shared/coding-agents.mdx",
+    "CommonIssues": "shared/troubleshooting/common-issues.mdx",
+    "CopilotRuntime": "copilot-runtime.mdx",
+    "DisplayOnly": "shared/generative-ui/display-only.mdx",
+    "ErrorDebugging": "shared/troubleshooting/error-debugging.mdx",
+    "FrontendTools": "shared/app-control/frontend-tools.mdx",
+    "FrontEndToolsImpl": "shared/app-control/frontend-tools.mdx",
+    "GenerativeUISpecsOverview": "shared/generative-ui-specs-overview.mdx",
+    "HeadlessUI": "shared/basics/headless-ui.mdx",
+    "Inspector": "shared/premium/inspector.mdx",
+    "Interactive": "shared/generative-ui/interactive.mdx",
+    "MCPApps": "shared/generative-ui/mcp-apps.mdx",
+    "MCPSetup": "shared/guides/mcp-server-setup.mdx",
+    "MigrateTo1100": "shared/troubleshooting/migrate-to-1.10.X.mdx",
+    "MigrateTo182": "shared/troubleshooting/migrate-to-1.8.2.mdx",
+    "MigrateToV2": "shared/troubleshooting/migrate-to-v2.mdx",
+    "Observability": "shared/premium/observability.mdx",
+    "ObservabilityConnectors": "shared/troubleshooting/observability-connectors.mdx",
+    "Overview": "shared/premium/overview.mdx",
+    "PrebuiltComponents": "shared/basics/prebuilt-components.mdx",
+    "ProgrammaticControl": "shared/basics/programmatic-control.mdx",
+    "ReasoningMessages": "shared/guides/custom-look-and-feel/reasoning-messages.mdx",
+    "Slots": "shared/basics/slots.mdx",
+    "ToolRendering": "shared/generative-ui/tool-rendering.mdx",
+    "DefaultToolRendering": "shared/guides/default-tool-rendering.mdx",
+};
+
+// If the MDX content (after stripping frontmatter) is just a single component tag,
+// replace it with the snippet file's content.
+function inlineSnippets(content: string): string {
+    const trimmed = content.replace(/^import\s+.+$/gm, "").trim();
+    const match = trimmed.match(/^<(\w+)\s*(?:components=\{[^}]*\}\s*)?\/>\s*$/);
+    if (!match) return content;
+    const componentName = match[1];
+    const snippetRel = SNIPPET_MAP[componentName];
+    if (!snippetRel) return content;
+    const snippetPath = path.join(SNIPPETS_DIR, snippetRel);
+    if (!fs.existsSync(snippetPath)) return content;
+    let snippetContent = fs.readFileSync(snippetPath, "utf-8");
+    // Strip frontmatter from snippet
+    snippetContent = snippetContent.replace(/^---[\s\S]*?---\n?/, "");
+    // Strip import statements from snippet
+    snippetContent = snippetContent.replace(/^import\s+.+$/gm, "");
+    // Recursively inline if the snippet itself is a component delegate
+    return inlineSnippets(snippetContent);
+}
 
 function getNavItems(): { section: string; items: { slug: string; title: string }[] }[] {
     const sections: Record<string, { slug: string; title: string }[]> = {};
@@ -304,7 +359,8 @@ export default async function DocsPage({ params }: { params: Promise<{ slug?: st
     }
 
     const source = fs.readFileSync(filePath, "utf-8");
-    const content = source.replace(/^---[\s\S]*?---\n?/, "");
+    const rawContent = source.replace(/^---[\s\S]*?---\n?/, "");
+    const content = inlineSnippets(rawContent);
     const titleMatch = source.match(/title:\s*["']?(.+?)["']?\s*$/m) || content.match(/^#\s+(.+)$/m);
     const title = titleMatch?.[1] || slugPath.split("/").pop()?.replace(/-/g, " ") || "Docs";
 
