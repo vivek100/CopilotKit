@@ -308,27 +308,28 @@ export default async function AgUiDocPage({
     const navTabs = getNavTabs();
 
     function renderNavItem(item: ResolvedNavItem, depth: number = 0): React.ReactNode {
+        const indent = depth * 16;
         if (item.kind === "page") {
             return (
                 <Link
                     key={item.slug}
                     href={`/ag-ui/${item.slug}`}
-                    className={`block py-1 text-xs transition-colors ${
+                    className={`block py-[5px] text-[14px] transition-colors ${
                         item.slug === slugPath
-                            ? "text-[var(--violet)] font-medium"
-                            : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                            ? "text-[var(--text)] font-medium"
+                            : "text-[var(--text-secondary)] hover:text-[var(--text)]"
                     }`}
-                    style={{ paddingLeft: `${depth * 8}px` }}
+                    style={{ paddingLeft: `${indent}px` }}
                 >
                     {item.title}
                 </Link>
             );
         }
         return (
-            <div key={item.name} className="mt-1 mb-1">
+            <div key={item.name} className="mt-2">
                 <div
-                    className="text-[10px] font-mono text-[var(--text-faint)] mb-1"
-                    style={{ paddingLeft: `${depth * 8}px` }}
+                    className="py-[5px] text-[14px] text-[var(--text-muted)]"
+                    style={{ paddingLeft: `${indent}px` }}
                 >
                     {item.name}
                 </div>
@@ -370,14 +371,11 @@ export default async function AgUiDocPage({
                 >
                     AG-UI Protocol
                 </Link>
-                {navTabs.map((tab) => (
-                    <div key={tab.tab} className="mb-5">
-                        <div className="text-[11px] font-semibold uppercase tracking-widest text-[var(--text)] mb-2 pb-1 border-b border-[var(--border)]">
-                            {tab.tab}
-                        </div>
+                {navTabs.map((tab, i) => (
+                    <div key={tab.tab} className={i > 0 ? "mt-6 pt-5 border-t border-[var(--border)]" : ""}>
                         {tab.sections.map(({ section, items }) => (
-                            <div key={section} className="mb-4">
-                                <div className="text-[10px] font-mono uppercase tracking-widest text-[var(--text-faint)] mb-2">
+                            <div key={section} className="mb-5">
+                                <div className="text-[13px] font-semibold text-[var(--text)] mb-2">
                                     {section}
                                 </div>
                                 {items.map((item) => renderNavItem(item))}
