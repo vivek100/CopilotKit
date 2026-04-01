@@ -34,7 +34,7 @@ Use frontend tools when you need your agent to interact with client-side primiti
 <Steps>
     <Step>
       ### Run and connect your agent
-      <RunAndConnect components={props.components} />
+      <RunAndConnect />
     </Step>
 
     <Step>
@@ -80,7 +80,7 @@ Use frontend tools when you need your agent to interact with client-side primiti
 
         Now, we'll need to modify the agent to access these frontend tools. In your terminal, navigate to your agent's folder and continue from there!
 
-        <InstallSDKSnippet components={props.components}/>
+        <InstallSDKSnippet/>
     </Step>
     <Step>
         ### Inheriting from CopilotKitState
@@ -117,7 +117,7 @@ Use frontend tools when you need your agent to interact with client-side primiti
 
         Here's how you can call a frontend tool from your agent:
 
-        <FrontEndToolsImpl components={props.components} />
+        <FrontEndToolsImpl />
 
         These tools are automatically populated by CopilotKit and are compatible with LangChain's tool call definitions, making it straightforward to integrate them into your agent's workflow.
     </Step>

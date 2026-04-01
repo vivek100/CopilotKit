@@ -25,7 +25,7 @@ For components that need user interaction, see [Interactive](/langgraph/generati
 <Steps>
   <Step>
     ### Run and connect your agent
-    <RunAndConnect components={props.components} />
+    <RunAndConnect />
   </Step>
   <Step>
     ### Register a component
@@ -68,7 +68,7 @@ For components that need user interaction, see [Interactive](/langgraph/generati
 
     Now, we'll need to make sure your agent can access frontend tools. In your terminal, navigate to your agent's folder and continue from there.
 
-    <InstallSDKSnippet components={props.components}/>
+    <InstallSDKSnippet/>
   </Step>
   <Step>
     ### Inherit from CopilotKitState
@@ -100,7 +100,7 @@ For components that need user interaction, see [Interactive](/langgraph/generati
 
     When your agent's LLM decides to use the tool, CopilotKit automatically renders your component in the chat. The tool is registered as a frontend tool that the agent can discover and call.
 
-    <FrontEndToolsImpl components={props.components} />
+    <FrontEndToolsImpl />
   </Step>
   <Step>
     ### Give it a try!
