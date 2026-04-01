@@ -1,12 +1,18 @@
 #!/bin/bash
 set -e
 
-# Start agent backend
-python -m uvicorn agent_server:app --host 0.0.0.0 --port 8000 &
+echo "[entrypoint] Starting agent backend on port 8000..."
+python -m uvicorn agent_server:app --host 0.0.0.0 --port 8000 2>&1 &
+AGENT_PID=$!
 
-# Start Next.js frontend (PORT defaults to 10000 for Render)
-npx next start --port ${PORT:-10000} &
+echo "[entrypoint] Starting Next.js frontend on port ${PORT:-10000}..."
+npx next start --port ${PORT:-10000} 2>&1 &
+NEXT_PID=$!
+
+echo "[entrypoint] Agent PID=$AGENT_PID, Next PID=$NEXT_PID"
 
 # Wait for either process to exit
 wait -n
-exit $?
+EXIT_CODE=$?
+echo "[entrypoint] Process exited with code $EXIT_CODE"
+exit $EXIT_CODE
