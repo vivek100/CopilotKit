@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 
 import uvicorn
-from agent_framework import ChatClientProtocol
+from agent_framework import BaseChatClient
 from agent_framework.openai import OpenAIChatClient
 from agent_framework_ag_ui import add_agent_framework_fastapi_endpoint
 from dotenv import load_dotenv
@@ -22,11 +22,11 @@ from agents.agent import create_agent
 load_dotenv()
 
 
-def _build_chat_client() -> ChatClientProtocol:
+def _build_chat_client() -> BaseChatClient:
     try:
         if bool(os.getenv("OPENAI_API_KEY")):
             return OpenAIChatClient(
-                model_id=os.getenv("OPENAI_CHAT_MODEL_ID", "gpt-4o-mini"),
+                model=os.getenv("OPENAI_CHAT_MODEL_ID", "gpt-4o-mini"),
                 api_key=os.getenv("OPENAI_API_KEY"),
             )
 
