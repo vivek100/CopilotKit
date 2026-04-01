@@ -12,7 +12,7 @@
   "dependencies": {
     "@ag-ui/core": "^0.0.48",
     "@ag-ui/encoder": "^0.0.48",
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.57.0",
     "@copilotkit/react-core": "next",
     "@copilotkit/runtime": "next",
     "express": "^4.21.0",
