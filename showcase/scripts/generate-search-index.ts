@@ -50,7 +50,8 @@ function extractDescription(content: string): string {
 function scanMdxDir(
     dir: string,
     hrefPrefix: string,
-    type: "reference" | "ag-ui"
+    type: "page" | "reference" | "ag-ui",
+    allowList?: Set<string>
 ): SearchEntry[] {
     const entries: SearchEntry[] = [];
 
@@ -69,6 +70,13 @@ function scanMdxDir(
                     slug === "index"
                         ? hrefPrefix + pathPrefix
                         : `${hrefPrefix}${pathPrefix}/${slug}`;
+
+                // When an allow list is provided, only include matching slugs.
+                // The slug is the href with the prefix stripped and leading slash removed.
+                if (allowList) {
+                    const relSlug = href.slice(hrefPrefix.length + 1);
+                    if (!allowList.has(relSlug)) continue;
+                }
 
                 const content = fs.readFileSync(
                     path.join(currentDir, item.name),
@@ -106,10 +114,58 @@ function main() {
         console.log(`  Reference: ${refEntries.length} entries`);
     }
 
-    // AG-UI docs
+    // AG-UI docs — only index pages that are published in the AG-UI sidebar nav
+    const AGUI_PUBLISHED_SLUGS = new Set([
+        "introduction",
+        "agentic-protocols",
+        "quickstart/applications",
+        "quickstart/introduction",
+        "quickstart/server",
+        "quickstart/middleware",
+        "quickstart/clients",
+        "concepts/architecture",
+        "concepts/events",
+        "concepts/agents",
+        "concepts/middleware",
+        "concepts/messages",
+        "concepts/reasoning",
+        "concepts/state",
+        "concepts/serialization",
+        "concepts/tools",
+        "concepts/capabilities",
+        "concepts/generative-ui-specs",
+        "drafts/overview",
+        "drafts/multimodal-messages",
+        "drafts/interrupts",
+        "drafts/generative-ui",
+        "drafts/meta-events",
+        "tutorials/cursor",
+        "tutorials/debugging",
+        "development/updates",
+        "development/roadmap",
+        "development/contributing",
+        "sdk/js/core/overview",
+        "sdk/js/core/types",
+        "sdk/js/core/multimodal-inputs",
+        "sdk/js/core/events",
+        "sdk/js/client/overview",
+        "sdk/js/client/abstract-agent",
+        "sdk/js/client/http-agent",
+        "sdk/js/client/middleware",
+        "sdk/js/client/subscriber",
+        "sdk/js/client/compaction",
+        "sdk/js/encoder",
+        "sdk/js/proto",
+        "sdk/python/core/overview",
+        "sdk/python/core/types",
+        "sdk/python/core/multimodal-inputs",
+        "sdk/python/core/events",
+        "sdk/python/encoder/overview",
+    ]);
+
     const aguiDir = path.join(SHELL_DIR, "content", "ag-ui");
     if (fs.existsSync(aguiDir)) {
-        const aguiEntries = scanMdxDir(aguiDir, "/ag-ui", "ag-ui");
+        const aguiEntries = scanMdxDir(aguiDir, "/ag-ui", "ag-ui", AGUI_PUBLISHED_SLUGS);
         entries.push(...aguiEntries);
         console.log(`  AG-UI: ${aguiEntries.length} entries`);
     }

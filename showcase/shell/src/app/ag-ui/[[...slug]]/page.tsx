@@ -1,3 +1,4 @@
+import React from "react";
 import fs from "fs";
 import path from "path";
 import { notFound } from "next/navigation";
@@ -8,51 +9,176 @@ import { PropertyReference } from "@/components/property-reference";
 
 const CONTENT_DIR = path.join(process.cwd(), "src/content/ag-ui");
 
-// Build sidebar nav from the file system
-function getNavItems(): { section: string; items: { slug: string; title: string }[] }[] {
-    const sections: Record<string, { slug: string; title: string }[]> = {
-        "Getting Started": [],
-        "Concepts": [],
-        "Quick Start": [],
-        "Drafts": [],
-        "SDK — JavaScript": [],
-        "SDK — Python": [],
-        "SDK — Go": [],
-        "Tutorials": [],
-        "Development": [],
-    };
+// A nav entry is either a page (slug) or a named sub-group with children
+type NavEntry = string | { group: string; children: NavEntry[] };
+type NavSection = { section: string; entries: NavEntry[] };
+type NavTab = { tab: string; sections: NavSection[] };
 
-    function scanDir(dir: string, prefix: string = "") {
-        if (!fs.existsSync(dir)) return;
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-        for (const entry of entries) {
-            if (entry.isFile() && entry.name.endsWith(".mdx")) {
-                const slug = prefix
-                    ? `${prefix}/${entry.name.replace(".mdx", "")}`
-                    : entry.name.replace(".mdx", "");
-                const raw = fs.readFileSync(path.join(dir, entry.name), "utf-8");
-                const titleMatch = raw.match(/^#\s+(.+)$/m) || raw.match(/title:\s*["']?(.+?)["']?\s*$/m);
-                const title = titleMatch?.[1] || entry.name.replace(".mdx", "").replace(/-/g, " ");
+// Hardcoded navigation matching the original AG-UI docs.json structure.
+// Only these pages appear in the sidebar — no filesystem scanning.
+const NAV_DEFINITION: NavTab[] = [
+    {
+        tab: "Docs",
+        sections: [
+            {
+                section: "Get Started",
+                entries: [
+                    "introduction",
+                    "agentic-protocols",
+                    {
+                        group: "Quickstart",
+                        children: [
+                            "quickstart/applications",
+                            {
+                                group: "Build integrations",
+                                children: [
+                                    "quickstart/introduction",
+                                    "quickstart/server",
+                                    "quickstart/middleware",
+                                ],
+                            },
+                            "quickstart/clients",
+                        ],
+                    },
+                ],
+            },
+            {
+                section: "Concepts",
+                entries: [
+                    "concepts/architecture",
+                    "concepts/events",
+                    "concepts/agents",
+                    "concepts/middleware",
+                    "concepts/messages",
+                    "concepts/reasoning",
+                    "concepts/state",
+                    "concepts/serialization",
+                    "concepts/tools",
+                    "concepts/capabilities",
+                    "concepts/generative-ui-specs",
+                ],
+            },
+            {
+                section: "Draft Proposals",
+                entries: [
+                    "drafts/overview",
+                    "drafts/multimodal-messages",
+                    "drafts/interrupts",
+                    "drafts/generative-ui",
+                    "drafts/meta-events",
+                ],
+            },
+            {
+                section: "Tutorials",
+                entries: [
+                    "tutorials/cursor",
+                    "tutorials/debugging",
+                ],
+            },
+            {
+                section: "Development",
+                entries: [
+                    "development/updates",
+                    "development/roadmap",
+                    "development/contributing",
+                ],
+            },
+        ],
+    },
+    {
+        tab: "SDKs",
+        sections: [
+            {
+                section: "TypeScript",
+                entries: [
+                    {
+                        group: "@ag-ui/core",
+                        children: [
+                            "sdk/js/core/overview",
+                            "sdk/js/core/types",
+                            "sdk/js/core/multimodal-inputs",
+                            "sdk/js/core/events",
+                        ],
+                    },
+                    {
+                        group: "@ag-ui/client",
+                        children: [
+                            "sdk/js/client/overview",
+                            "sdk/js/client/abstract-agent",
+                            "sdk/js/client/http-agent",
+                            "sdk/js/client/middleware",
+                            "sdk/js/client/subscriber",
+                            "sdk/js/client/compaction",
+                        ],
+                    },
+                    "sdk/js/encoder",
+                    "sdk/js/proto",
+                ],
+            },
+            {
+                section: "Python",
+                entries: [
+                    {
+                        group: "ag_ui.core",
+                        children: [
+                            "sdk/python/core/overview",
+                            "sdk/python/core/types",
+                            "sdk/python/core/multimodal-inputs",
+                            "sdk/python/core/events",
+                        ],
+                    },
+                    {
+                        group: "ag_ui.encoder",
+                        children: [
+                            "sdk/python/encoder/overview",
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+];
 
-                if (prefix.startsWith("concepts")) sections["Concepts"].push({ slug, title });
-                else if (prefix.startsWith("quickstart")) sections["Quick Start"].push({ slug, title });
-                else if (prefix.startsWith("drafts")) sections["Drafts"].push({ slug, title });
-                else if (prefix.startsWith("sdk/js")) sections["SDK — JavaScript"].push({ slug, title });
-                else if (prefix.startsWith("sdk/python")) sections["SDK — Python"].push({ slug, title });
-                else if (prefix.startsWith("sdk/go")) sections["SDK — Go"].push({ slug, title });
-                else if (prefix.startsWith("tutorials")) sections["Tutorials"].push({ slug, title });
-                else if (prefix.startsWith("development")) sections["Development"].push({ slug, title });
-                else sections["Getting Started"].push({ slug, title });
-            } else if (entry.isDirectory()) {
-                scanDir(path.join(dir, entry.name), prefix ? `${prefix}/${entry.name}` : entry.name);
-            }
-        }
+// Read the title for a given slug from its MDX file
+function getTitleForSlug(slug: string): string {
+    const filePath = path.join(CONTENT_DIR, `${slug}.mdx`);
+    if (!fs.existsSync(filePath)) {
+        return slug.split("/").pop()?.replace(/-/g, " ") || slug;
     }
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const fmMatch = raw.match(/title:\s*["']?(.+?)["']?\s*$/m);
+    if (fmMatch) return fmMatch[1].replace(/["']$/, "");
+    const headingMatch = raw.match(/^#\s+(.+)$/m);
+    if (headingMatch) return headingMatch[1];
+    return slug.split("/").pop()?.replace(/-/g, " ") || slug;
+}
 
-    scanDir(CONTENT_DIR);
-    return Object.entries(sections)
-        .filter(([, items]) => items.length > 0)
-        .map(([section, items]) => ({ section, items }));
+// Resolved nav types used for rendering
+type ResolvedPage = { kind: "page"; slug: string; title: string };
+type ResolvedGroup = { kind: "group"; name: string; children: ResolvedNavItem[] };
+type ResolvedNavItem = ResolvedPage | ResolvedGroup;
+type ResolvedSection = { section: string; items: ResolvedNavItem[] };
+type ResolvedTab = { tab: string; sections: ResolvedSection[] };
+
+function resolveEntry(entry: NavEntry): ResolvedNavItem {
+    if (typeof entry === "string") {
+        return { kind: "page", slug: entry, title: getTitleForSlug(entry) };
+    }
+    return {
+        kind: "group",
+        name: entry.group,
+        children: entry.children.map(resolveEntry),
+    };
+}
+
+function getNavTabs(): ResolvedTab[] {
+    return NAV_DEFINITION.map((tab) => ({
+        tab: tab.tab,
+        sections: tab.sections.map((sec) => ({
+            section: sec.section,
+            items: sec.entries.map(resolveEntry),
+        })),
+    }));
 }
 
 const components = {
@@ -105,7 +231,37 @@ export default async function AgUiDocPage({
         || content.match(/^#\s+(.+)$/m);
     const title = titleMatch?.[1] || slugPath.split("/").pop()?.replace(/-/g, " ") || "AG-UI";
 
-    const nav = getNavItems();
+    const navTabs = getNavTabs();
+
+    function renderNavItem(item: ResolvedNavItem, depth: number = 0): React.ReactNode {
+        if (item.kind === "page") {
+            return (
+                <Link
+                    key={item.slug}
+                    href={`/ag-ui/${item.slug}`}
+                    className={`block py-1 text-xs transition-colors ${
+                        item.slug === slugPath
+                            ? "text-[var(--violet)] font-medium"
+                            : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                    }`}
+                    style={{ paddingLeft: `${depth * 8}px` }}
+                >
+                    {item.title}
+                </Link>
+            );
+        }
+        return (
+            <div key={item.name} className="mt-1 mb-1">
+                <div
+                    className="text-[10px] font-mono text-[var(--text-faint)] mb-1"
+                    style={{ paddingLeft: `${depth * 8}px` }}
+                >
+                    {item.name}
+                </div>
+                {item.children.map((child) => renderNavItem(child, depth + 1))}
+            </div>
+        );
+    }
 
     return (
         <div className="flex" style={{ minHeight: "calc(100vh - 52px)" }}>
@@ -117,23 +273,18 @@ export default async function AgUiDocPage({
                 >
                     AG-UI Protocol
                 </Link>
-                {nav.map(({ section, items }) => (
-                    <div key={section} className="mb-4">
-                        <div className="text-[10px] font-mono uppercase tracking-widest text-[var(--text-faint)] mb-2">
-                            {section}
+                {navTabs.map((tab) => (
+                    <div key={tab.tab} className="mb-5">
+                        <div className="text-[11px] font-semibold uppercase tracking-widest text-[var(--text)] mb-2 pb-1 border-b border-[var(--border)]">
+                            {tab.tab}
                         </div>
-                        {items.map((item) => (
-                            <Link
-                                key={item.slug}
-                                href={`/ag-ui/${item.slug}`}
-                                className={`block py-1 text-xs transition-colors ${
-                                    item.slug === slugPath
-                                        ? "text-[var(--violet)] font-medium"
-                                        : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                                }`}
-                            >
-                                {item.title}
-                            </Link>
+                        {tab.sections.map(({ section, items }) => (
+                            <div key={section} className="mb-4">
+                                <div className="text-[10px] font-mono uppercase tracking-widest text-[var(--text-faint)] mb-2">
+                                    {section}
+                                </div>
+                                {items.map((item) => renderNavItem(item))}
+                            </div>
                         ))}
                     </div>
                 ))}
