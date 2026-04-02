@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { Callout, Cards, Card, Accordions, Accordion } from "@/components/mdx-components";
 import { PropertyReference } from "@/components/property-reference";
@@ -391,7 +392,7 @@ export default async function AgUiDocPage({
                     {title}
                 </h1>
                 <div className="reference-content">
-                    <MDXRemote source={content} components={components} />
+                    <MDXRemote source={content} components={components} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
                 </div>
             </main>
         </div>

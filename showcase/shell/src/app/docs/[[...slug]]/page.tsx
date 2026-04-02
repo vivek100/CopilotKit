@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { Callout, Cards, Card, Accordions, Accordion } from "@/components/mdx-components";
 import { PropertyReference } from "@/components/property-reference";
@@ -447,7 +448,7 @@ export default async function DocsPage({ params }: { params: Promise<{ slug?: st
             <main className="flex-1 max-w-3xl px-8 py-8">
                 <h1 className="text-2xl font-semibold text-[var(--text)] tracking-tight mb-6">{title}</h1>
                 <div className="reference-content">
-                    <MDXRemote source={content} components={components} />
+                    <MDXRemote source={content} components={components} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
                 </div>
             </main>
         </div>
