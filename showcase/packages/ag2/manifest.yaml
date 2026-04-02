@@ -8,7 +8,7 @@ partner_docs: null
 repo: https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/ag2
 copilotkit_version: 2.0.0
 backend_url: https://showcase-ag2-production.up.railway.app
-deployed: false
+deployed: true
 generative_ui:
   - constrained-explicit
 interaction_modalities:

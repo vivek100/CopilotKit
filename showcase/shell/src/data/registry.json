@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-31T17:41:22.893Z",
+  "generated_at": "2026-04-02T18:12:00.903Z",
   "feature_registry": {
     "version": "1.0.0",
     "categories": [
@@ -349,7 +349,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/ag2",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-ag2-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -416,7 +416,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/agno",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-agno-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -487,7 +487,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/strands",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-strands-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -550,7 +550,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/crewai-crews",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-crewai-crews-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -617,7 +617,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/google-adk",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-google-adk-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -680,7 +680,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/langgraph-fastapi",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-langgraph-fastapi-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -868,7 +868,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/langgraph-typescript",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-langgraph-typescript-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -999,7 +999,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/llamaindex",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-llamaindex-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -1130,7 +1130,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/ms-agent-dotnet",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-ms-agent-dotnet-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -1193,7 +1193,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/ms-agent-python",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-ms-agent-python-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],
@@ -1256,7 +1256,7 @@
       "repo": "https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/pydantic-ai",
       "copilotkit_version": "2.0.0",
       "backend_url": "https://showcase-pydantic-ai-production.up.railway.app",
-      "deployed": false,
+      "deployed": true,
       "generative_ui": [
         "constrained-explicit"
       ],

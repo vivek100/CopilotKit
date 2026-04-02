@@ -11,7 +11,7 @@ partner_docs: https://docs.copilotkit.ai/integrations/langgraph
 repo: https://github.com/CopilotKit/CopilotKit/tree/main/showcase/packages/langgraph-typescript
 copilotkit_version: 2.0.0
 backend_url: https://showcase-langgraph-typescript-production.up.railway.app
-deployed: false
+deployed: true
 generative_ui:
   - constrained-explicit
 interaction_modalities:
