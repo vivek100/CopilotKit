@@ -1500,5 +1500,4 @@ export class BasicAgent extends BuiltInAgent {
 /** @deprecated Use BuiltInAgentClassicConfig instead */
 export type BasicAgentConfiguration = BuiltInAgentClassicConfig;
 
-export { Agent, type AgentConfig, type AISDKAgentConfig, type TanStackAgentConfig, type CustomAgentConfig } from "./agent";
 export * from "./converters";
