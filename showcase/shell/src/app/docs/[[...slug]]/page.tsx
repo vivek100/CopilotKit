@@ -44,30 +44,76 @@ const SNIPPET_MAP: Record<string, string> = {
     "DefaultToolRendering": "shared/guides/default-tool-rendering.mdx",
 };
 
-// If the MDX content (after stripping frontmatter) is just a single component tag,
-// replace it with the snippet file's content.
-function inlineSnippets(content: string): string {
-    const trimmed = content.replace(/^import\s+.+$/gm, "").trim();
-    const match = trimmed.match(/^<(\w+)\s*(?:components=\{[^}]*\}\s*)?\/>\s*$/);
-    if (!match) return content;
-    const componentName = match[1];
-    const snippetRel = SNIPPET_MAP[componentName];
-    if (!snippetRel) {
-        console.warn(`[docs] No snippet mapping for component: ${componentName}`);
-        return content;
-    }
-    const snippetPath = path.join(SNIPPETS_DIR, snippetRel);
-    if (!fs.existsSync(snippetPath)) {
-        console.warn(`[docs] Snippet file not found: ${snippetPath}`);
-        return content;
-    }
-    let snippetContent = fs.readFileSync(snippetPath, "utf-8");
-    // Strip frontmatter from snippet
-    snippetContent = snippetContent.replace(/^---[\s\S]*?---\n?/, "");
-    // Strip import statements from snippet
-    snippetContent = snippetContent.replace(/^import\s+.+$/gm, "");
-    // Recursively inline if the snippet itself is a component delegate
-    return inlineSnippets(snippetContent);
+// Map page sub-paths to snippet component names for <SharedContent /> resolution.
+// Integration pages like integrations/langgraph/coding-agents.mdx use <SharedContent />
+// to render the same content as the top-level coding-agents page.
+const SUBPATH_TO_COMPONENT: Record<string, string> = {
+    "ag-ui": "AGUI",
+    "coding-agents": "CodingAgents",
+    "copilot-runtime": "CopilotRuntime",
+    "custom-look-and-feel/headless-ui": "HeadlessUI",
+    "custom-look-and-feel/slots": "Slots",
+    "frontend-tools": "FrontendTools",
+    "generative-ui/a2ui": "A2UI",
+    "generative-ui/mcp-apps": "MCPApps",
+    "generative-ui/tool-rendering": "ToolRendering",
+    "generative-ui/your-components/display-only": "DisplayOnly",
+    "generative-ui/your-components/interactive": "Interactive",
+    "inspector": "Inspector",
+    "prebuilt-components": "PrebuiltComponents",
+    "programmatic-control": "ProgrammaticControl",
+    "premium/headless-ui": "HeadlessUI",
+    "premium/observability": "Observability",
+    "premium/overview": "Overview",
+    "troubleshooting/common-issues": "CommonIssues",
+    "troubleshooting/error-debugging": "ErrorDebugging",
+    "troubleshooting/migrate-to-1.10.X": "MigrateTo1100",
+    "troubleshooting/migrate-to-1.8.2": "MigrateTo182",
+    "troubleshooting/migrate-to-v2": "MigrateToV2",
+    "troubleshooting/observability-connectors": "ObservabilityConnectors",
+};
+
+// Replace component tags (e.g. <CopilotRuntime />) with their snippet content.
+// Handles both single-component pages and tags embedded in mixed content.
+// slugPath is used to resolve <SharedContent /> in integration pages.
+function inlineSnippets(content: string, slugPath: string = ""): string {
+    // Strip import statements first
+    let result = content.replace(/^import\s+.+$/gm, "");
+
+    // Replace all self-closing component tags that have snippet mappings
+    // Matches: <ComponentName /> or <ComponentName components={props.components} />
+    result = result.replace(
+        /<([A-Z]\w*)\s*(?:components=\{[^}]*\}\s*)?\/>/g,
+        (match, componentName) => {
+            let snippetRel = SNIPPET_MAP[componentName];
+
+            // For <SharedContent />, resolve based on the page's sub-path
+            if (!snippetRel && componentName === "SharedContent" && slugPath) {
+                // Extract sub-path: integrations/<framework>/<subpath> → <subpath>
+                const subPathMatch = slugPath.match(/^integrations\/[^/]+\/(.+)$/);
+                if (subPathMatch) {
+                    const resolvedComponent = SUBPATH_TO_COMPONENT[subPathMatch[1]];
+                    if (resolvedComponent) {
+                        snippetRel = SNIPPET_MAP[resolvedComponent];
+                    }
+                }
+            }
+
+            if (!snippetRel) return match; // Keep unknown components as-is
+            const snippetPath = path.join(SNIPPETS_DIR, snippetRel);
+            if (!fs.existsSync(snippetPath)) {
+                console.warn(`[docs] Snippet file not found: ${snippetPath}`);
+                return match;
+            }
+            let snippetContent = fs.readFileSync(snippetPath, "utf-8");
+            snippetContent = snippetContent.replace(/^---[\s\S]*?---\n?/, "");
+            snippetContent = snippetContent.replace(/^import\s+.+$/gm, "");
+            // Recursively inline nested component delegates
+            return inlineSnippets(snippetContent, slugPath);
+        }
+    );
+
+    return result;
 }
 
 function getNavItems(): { section: string; items: { slug: string; title: string }[] }[] {
@@ -367,7 +413,7 @@ export default async function DocsPage({ params }: { params: Promise<{ slug?: st
 
     const source = fs.readFileSync(filePath, "utf-8");
     const rawContent = source.replace(/^---[\s\S]*?---\n?/, "");
-    const content = inlineSnippets(rawContent);
+    const content = inlineSnippets(rawContent, slugPath);
     const titleMatch = source.match(/title:\s*["']?(.+?)["']?\s*$/m) || content.match(/^#\s+(.+)$/m);
     const title = titleMatch?.[1] || slugPath.split("/").pop()?.replace(/-/g, " ") || "Docs";
 
