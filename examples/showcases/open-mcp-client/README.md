@@ -1,7 +1,5 @@
 # Open MCP Client Builder
 
-**Production go-live:** [`docs/TRACKER.md`](docs/TRACKER.md) · **Stakeholder / product handoff** (shipped scope, CopilotKit open questions): [`docs/HANDOFF.md`](docs/HANDOFF.md)
-
 This monorepo demonstrates **MCP Apps** with **CopilotKit**: the **MCP App builder** web UI (`apps/web`) drives a **Mastra** agent (`/api/mastra-agent`) that can provision **E2B** sandboxes running the **`mcp-use-server`** template (`apps/mcp-use-server`). An optional local sample is the [Three.js MCP example](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/threejs-server) in **`apps/threejs-server`** (used for sidebar defaults when running everything locally).
 
 https://github.com/user-attachments/assets/4bb35806-5e42-43c0-a8fe-01c0d1e5b8b3
@@ -16,7 +14,7 @@ https://github.com/user-attachments/assets/4bb35806-5e42-43c0-a8fe-01c0d1e5b8b3
 
 ## Getting started
 
-From the **repository root** (`with-mcp-apps`):
+From the **repository root**:
 
 ```powershell
 pnpm i
@@ -96,8 +94,6 @@ Mastra can reuse the same `messageId` for tool-call parents and text events; Cop
 - **Tools:** compact list; open a tool for **detail + preview** in a **modal** (not a third mobile tab).
 - **Chat:** CopilotKit v2 chat with suggestions.
 
-More: **[`docs/DYNAMIC_MCP.md`](docs/DYNAMIC_MCP.md)**.
-
 ### Mobile layout
 
 - **Tabs:** **Chat** and **Tools** (servers + tool list). Tool **preview / detail** opens in a **modal**.
@@ -119,28 +115,17 @@ More: **[`docs/DYNAMIC_MCP.md`](docs/DYNAMIC_MCP.md)**.
 3. Set secret env vars in the dashboard: at least **`OPENAI_API_KEY`**; for sandboxes add **`E2B_API_KEY`** + **`E2B_TEMPLATE`**.
 4. Deploy. The Blueprint configures build/start commands, `NODE_VERSION`, and `HOSTNAME` automatically.
 
-Render runs a long-lived Node.js process (not serverless), so there are no per-function timeout limits. See **[`docs/DEPLOY-RENDER.md`](docs/DEPLOY-RENDER.md)** for full setup, env var tables, and troubleshooting.
+Render runs a long-lived Node.js process (not serverless), so there are no per-function timeout limits.
 
 ### Agent tool pattern (sidebar preview)
 
 Widget tools should include **`_meta["ui/previewData"]`** for offline sidebar preview (example: **`apps/mcp-use-server/tools/product-search.ts`**).
-
-## Documentation
-
-**In this repo**
-
-- **[`docs/TRACKER.md`](docs/TRACKER.md)** — **production go-live checklist**
-- **[`docs/HANDOFF.md`](docs/HANDOFF.md)** — shipped scope, CopilotKit open questions
-- **[`docs/DEPLOY-RENDER.md`](docs/DEPLOY-RENDER.md)** — Render deployment guide
-- **[`docs/DYNAMIC_MCP.md`](docs/DYNAMIC_MCP.md)** — dynamic MCP patterns
-- **[`docs/PLAN.md`](docs/PLAN.md)** / **[`docs/E2B-IMPLEMENTATION.md`](docs/E2B-IMPLEMENTATION.md)** — roadmap and E2B design
 
 **UI entry:** `apps/web/app/page.tsx` (theme, layout, CopilotKit wiring).
 
 **External**
 
 - [CopilotKit](https://docs.copilotkit.ai)
-- [Next.js](https://nextjs.org/docs)
 - [MCP Apps / UI](https://mcpui.dev/guide/introduction)
 
 ## Contributing
